@@ -59,9 +59,12 @@ dlldata.c
 BenchmarkDotNet.Artifacts/
 
 # .NET Core
-project.lock.json
-project.fragment.lock.json
-artifacts/
+bin/
+obj/
+*.user
+*.userosscache
+*.suo
+*.userprefs
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
@@ -361,3 +364,21 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Visual Studio
+.vs/
+*.ncrunch*
+*.DotSettings.user
+
+# Rider
+.idea/
+*.sln.iml
+
+# Configuration files
+**/appsettings.json
+**/appsettings.*.json
+
+# Environment files
+.env
+.env.local
+.env.*.local
