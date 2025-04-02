@@ -2,7 +2,7 @@
 
 namespace QuickBaseApi.Client.Utils
 {
-    public static class Constants
+    public static class ErrorResponseMessages
     {
         public static readonly ErrorResponseModel InvalidUserToken = new ErrorResponseModel
         {

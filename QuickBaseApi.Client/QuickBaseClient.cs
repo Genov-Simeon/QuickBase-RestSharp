@@ -52,8 +52,7 @@ namespace QuickBaseApi.Client
             return fields ?? new List<QuickBaseFieldModel>();
         }
 
-        public async Task<(T Content, HttpStatusCode StatusCode)> AddRecordAsync<T>(object requestBody, string? userToken = null)
-            where T : class
+        public async Task<RestResponse> PostRecordAsync(object requestBody, string? userToken = null)
         {
             var request = new RestRequest("/records", Method.Post);
             request.AddJsonBody(requestBody);
@@ -64,41 +63,23 @@ namespace QuickBaseApi.Client
             }
 
             var response = await _restClient.ExecuteAsync(request);
-            var data = JsonConvert.DeserializeObject<T>(response.Content);
 
-             return (data, response.StatusCode);
+            return response;
         }
 
-        public Task<(CreateRecordResponseModel Content, HttpStatusCode StatusCode)> AddRecordAsync(object record, string? userToken = null)
+        public async Task<RestResponse> DeleteRecordAsync(object requestBody)
         {
-            return AddRecordAsync<CreateRecordResponseModel>(record, userToken);
-        }
-
-        public async Task<EditRecordResponseModel> EditRecordAsync(string tableId, string recordId, object record)
-        {
-            var request = new RestRequest($"/records/{tableId}/{recordId}", Method.Put);
-            request.AddJsonBody(record);
+            var request = new RestRequest("/records", Method.Delete);
+            request.AddJsonBody(requestBody);
 
             var response = await _restClient.ExecuteAsync(request);
-            var data = JsonConvert.DeserializeObject<EditRecordResponseModel>(response.Content);
-
+            
             if (!response.IsSuccessful)
             {
                 throw new Exception($"Failed to edit record: {response.Content}");
             }
 
-            return data;
-        }
-
-        public async Task DeleteRecordAsync(string tableId, string recordId)
-        {
-            var request = new RestRequest($"records/{tableId}/{recordId}", Method.Delete);
-            var response = await _restClient.ExecuteAsync(request);
-            
-            if (!response.IsSuccessful)
-            {
-                throw new Exception($"Failed to delete record: {response.ErrorMessage}");
-            }
+            return response;
         }
     }
 } 

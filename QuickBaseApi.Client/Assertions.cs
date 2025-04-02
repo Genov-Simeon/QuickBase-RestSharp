@@ -3,34 +3,40 @@ using NUnit.Framework;
 using QuickBaseApi.Client.Models;
 using System.Text.RegularExpressions;
 
-namespace QuickBaseApi.Tests
+namespace QuickBaseApi.Client
 {
     public static class Assertions
     {
         public static void AssertFieldValues(Dictionary<string, FieldValueModel>[] actualData, List<Dictionary<string, FieldValueModel>> expectedRecords, List<long> fieldsToReturn)
         {
-            for (int i = 0; i < actualData.Length; i++)
+            Assert.Multiple(() =>
             {
-                var actualRecord = actualData[i];
-                var expectedRecord = expectedRecords[i];
-
-                foreach (var fieldId in fieldsToReturn)
+                for (int i = 0; i < actualData.Length; i++)
                 {
-                    var key = fieldId.ToString();
+                    var actualRecord = actualData[i];
+                    var expectedRecord = expectedRecords[i];
 
-                    Assert.That(actualRecord.ContainsKey(key), Is.True, $"Field '{key}' missing in actual record {i}.");
-                    Assert.That(expectedRecord.ContainsKey(key), Is.True, $"Field '{key}' missing in expected record {i}.");
+                    Assert.Multiple(() =>
+                    {
+                        foreach (var fieldId in fieldsToReturn)
+                        {
+                            var key = fieldId.ToString();
 
-                    var actualValue = actualRecord[key]?.value;
-                    var expectedValue = expectedRecord[key]?.value;
+                            Assert.That(actualRecord.ContainsKey(key), Is.True, $"Field '{key}' missing in actual record {i}.");
+                            Assert.That(expectedRecord.ContainsKey(key), Is.True, $"Field '{key}' missing in expected record {i}.");
 
-                    var actualNormalized = NormalizeValue(actualValue);
-                    var expectedNormalized = NormalizeValue(expectedValue);
+                            var actualValue = actualRecord[key]?.value;
+                            var expectedValue = expectedRecord[key]?.value;
 
-                    Assert.That(actualNormalized, Is.EqualTo(expectedNormalized),
-                        $"Mismatch in record {i}, field '{key}': expected '{expectedNormalized}', got '{actualNormalized}'.");
+                            var actualNormalized = NormalizeValue(actualValue);
+                            var expectedNormalized = NormalizeValue(expectedValue);
+
+                            Assert.That(actualNormalized, Is.EqualTo(expectedNormalized),
+                                $"Mismatch in record {i}, field '{key}': expected '{expectedNormalized}', got '{actualNormalized}'.");
+                        }
+                    });
                 }
-            }
+            });
         }
 
         private static string NormalizeValue(object value)

@@ -4,46 +4,37 @@ namespace QuickBaseApi.Client.Factories
 {
     public static class RecordFactory
     {
-        public static RecordModel BuildSingleRecord(string tableId, Dictionary<string, FieldValueModel> record, long[] fieldsToReturn = null)
+        public static CreateRecordModel CreateRecord(string tableId, Dictionary<string, FieldValueModel> record, long[] fieldsToReturn = null)
         {
             var records = new List<Dictionary<string, FieldValueModel>> { record };
 
-            var model = new RecordModel
+            return new CreateRecordModel
             {
                 To = tableId,
-                Data = records
+                Data = records,
+                FieldsToReturn = fieldsToReturn ?? Array.Empty<long>()
             };
-
-            if (fieldsToReturn == null)
-            {
-                model.FieldsToReturn = Array.Empty<long>();
-            }
-            else
-            {
-                model.FieldsToReturn = fieldsToReturn;
-            }
-
-            return model;
         }
 
-        public static RecordModel BuildMultipleRecords(string tableId, List<Dictionary<string, FieldValueModel>> records, long[] fieldsToReturn = null)
+        public static CreateRecordModel CreateRecords(string tableId, List<Dictionary<string, FieldValueModel>> records, long[] fieldsToReturn = null)
         {
-            var model = new RecordModel
+            return new CreateRecordModel
             {
                 To = tableId,
-                Data = records
+                Data = records,
+                FieldsToReturn = fieldsToReturn ?? Array.Empty<long>()
             };
+        }
 
-            if (fieldsToReturn == null)
-            {
-                model.FieldsToReturn = Array.Empty<long>();
-            }
-            else
-            {
-                model.FieldsToReturn = fieldsToReturn;
-            }
+        public static DeleteRecordModel DeleteByQuery(string tableId, string value, QueryOperator op = QueryOperator.EX, string fieldId = "3")
+        {
+            string whereClause = $"{{{fieldId}.{op}.{value}}}";
 
-            return model;
+            return new DeleteRecordModel
+            {
+                From = tableId,
+                Where = whereClause
+            };
         }
     }
 }

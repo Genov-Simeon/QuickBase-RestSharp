@@ -4,7 +4,7 @@ using QuickBaseApi.Client.Models;
 
 namespace QuickBaseApi.Client.Factories
 {
-    public static class QuickBaseFieldFactory
+    public static class FieldValueFactory
     {
         public enum RequiredFieldFilter
         {
@@ -207,6 +207,10 @@ namespace QuickBaseApi.Client.Factories
 
             // Exclude primary key fields
             if (field.QuickBaseFieldProperties.TryGetValue("PrimaryKey", out var value) && value is bool isPrimaryKey && isPrimaryKey)
+                return false;
+
+            // Exclude append-only fields (cannot be edited)
+            if (field.QuickBaseFieldProperties.TryGetValue("appendOnly", out var appendOnlyObj) && appendOnlyObj is bool appendOnly && appendOnly)
                 return false;
 
             // Exclude fields based on read-only mode

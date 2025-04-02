@@ -2,7 +2,7 @@
 
 namespace QuickBaseApi.Client.Models
 {
-    public class RecordModel
+    public class CreateRecordModel
     {
         [JsonProperty("to", NullValueHandling = NullValueHandling.Ignore)]
         public string? To { get; set; }
