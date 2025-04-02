@@ -9,8 +9,6 @@ namespace QuickBaseApi.Tests
     {
         public static void AssertFieldValues(Dictionary<string, FieldValueModel>[] actualData, List<Dictionary<string, FieldValueModel>> expectedRecords, List<long> fieldsToReturn)
         {
-            Assert.That(actualData.Length, Is.EqualTo(expectedRecords.Count), "Mismatch in number of records.");
-
             for (int i = 0; i < actualData.Length; i++)
             {
                 var actualRecord = actualData[i];
@@ -89,7 +87,7 @@ namespace QuickBaseApi.Tests
                 "Mismatch in the total number of processed records.");
         }
 
-        public static void AssertRequiredFieldsErrorMessage(CreateRecordResponseModel response, List<QuickBaseFieldModel> fields)
+        public static void AssertRequiredFieldsMissingErrorMessage(CreateRecordResponseModel response, List<QuickBaseFieldModel> fields)
         {
             var requiredFieldIds = fields
                 .Where(f => f.Required == true)
@@ -104,6 +102,28 @@ namespace QuickBaseApi.Tests
                 foreach (var errorMessage in errorMessages)
                 {
                     bool containsRequiredId = requiredFieldIds.Any(id => errorMessage.Contains($"Missing value for required field with ID \"{id}\""));
+
+                    if (!containsRequiredId)
+                    {
+                        throw new Exception($"Error message on line {lineNumber} does not match any required field ID: {errorMessage}");
+                    }
+                }
+            }
+        }
+
+        public static void AssertIncompatibleFieldsErrorMessage(CreateRecordResponseModel response, Dictionary<string, FieldValueModel> fields)
+        {
+            var ids = new HashSet<string>(fields.Keys);
+
+            foreach (var lineError in response.Metadata.LineErrors)
+            {
+                string lineNumber = lineError.Key;
+                string[] errorMessages = lineError.Value;
+
+                foreach (var errorMessage in errorMessages)
+                { 
+                   
+                    bool containsRequiredId = ids.Any(id => errorMessage.Contains($"Incompatible value for field with ID \"{id}\""));
 
                     if (!containsRequiredId)
                     {

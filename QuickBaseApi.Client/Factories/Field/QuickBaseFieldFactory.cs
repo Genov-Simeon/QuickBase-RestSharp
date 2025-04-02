@@ -13,11 +13,7 @@ namespace QuickBaseApi.Client.Factories
             OnlyOptional
         }
 
-        public static List<Dictionary<string, FieldValueModel>> GenerateRecordsForTable(
-            List<QuickBaseFieldModel> fields,
-            Func<QuickBaseFieldModel, object> valueGenerator,
-            RequiredFieldFilter filter = RequiredFieldFilter.All,
-            int maxEntries = 5)
+        public static List<Dictionary<string, FieldValueModel>> GenerateValidRecordsForTable(List<QuickBaseFieldModel> fields, RequiredFieldFilter filter = RequiredFieldFilter.All, int maxEntries = 5)
         {
             var random = new Random();
             int count = random.Next(1, maxEntries + 1);
@@ -26,81 +22,85 @@ namespace QuickBaseApi.Client.Factories
 
             for (int i = 0; i < count; i++)
             {
-                var record = new Dictionary<string, FieldValueModel>();
-
-                foreach (var field in fields)
-                {
-                    if (!IsWritableField(field))
-                        continue;
-
-                    if (filter == RequiredFieldFilter.OnlyRequired && field.Required != true)
-                        continue;
-
-                    if (filter == RequiredFieldFilter.OnlyOptional && field.Required == true)
-                        continue;
-
-                    var value = valueGenerator(field);
-
-                    if (value != null)
-                    {
-                        record[field.Id.ToString()] = new FieldValueModel { value = value };
-                    }
-                }
-
+                var record = GenerateValidRecordForTable(fields, filter);
                 records.Add(record);
             }
 
             return records;
         }
 
-        public static List<Dictionary<string, FieldValueModel>> GenerateValidRecordsForTable(
-            List<QuickBaseFieldModel> fields,
-            RequiredFieldFilter filter = RequiredFieldFilter.All,
-            int maxEntries = 5)
+
+        public static Dictionary<string, FieldValueModel> GenerateValidRecordForTable(List<QuickBaseFieldModel> fields, RequiredFieldFilter filter = RequiredFieldFilter.All)
         {
-            return GenerateRecordsForTable(fields, GenerateRandomValueForField, filter, maxEntries);
+            var record = new Dictionary<string, FieldValueModel>();
+
+            foreach (var field in fields)
+            {
+                if (!IsWritableField(field))
+                    continue;
+
+                if (filter == RequiredFieldFilter.OnlyRequired && field.Required != true)
+                    continue;
+
+                if (filter == RequiredFieldFilter.OnlyOptional && field.Required == true)
+                    continue;
+
+                var value = GenerateRandomValueForField(field);
+
+                if (value != null)
+                {
+                    record[field.Id.ToString()] = new FieldValueModel { value = value };
+                }
+            }
+
+            return record;
         }
 
-        public static List<Dictionary<string, FieldValueModel>> GenerateInvalidRecordsForTable(
-            List<QuickBaseFieldModel> fields,
-            RequiredFieldFilter filter = RequiredFieldFilter.All,
-            int maxEntries = 5)
+        public static List<(Dictionary<string, FieldValueModel> RequiredRecord, Dictionary<string, FieldValueModel> InvalidRecord)> GenerateInValidRecordsForTable(List<QuickBaseFieldModel> fields, int maxEntries = 5)
         {
-            return GenerateRecordsForTable(fields, GenerateInvalidValueForField, filter, maxEntries);
+            var random = new Random();
+            int count = random.Next(1, maxEntries + 1);
+
+            var records = new List<(Dictionary<string, FieldValueModel> RequiredRecord, Dictionary<string, FieldValueModel> InvalidRecord)>();
+
+
+            for (int i = 0; i < count; i++)
+            {
+                var record = GenerateInvalidRecordForTable(fields);
+                records.Add(record);
+            }
+
+            return records;
         }
 
+        // Add required fields and invalid data restricted to "numeric" and "work date" fields. Other fields not 
+        public static ( Dictionary<string, FieldValueModel> RequiredRecord, Dictionary<string, FieldValueModel> InvalidRecord) GenerateInvalidRecordForTable( List<QuickBaseFieldModel> fields)
+        {
+            var requiredPart = new Dictionary<string, FieldValueModel>();
+            var invalidPart = new Dictionary<string, FieldValueModel>();
 
-        private static bool IsWritableField(QuickBaseFieldModel field)
-		{
-			var fieldType = field.FieldType?.ToLowerInvariant();
-			var label = field.Label?.ToLowerInvariant();
+            foreach (var field in fields)
+            {
+                if (field.Required == true)
+                {
+                    requiredPart[field.Id.ToString()] = new FieldValueModel
+                    {
+                        value = GenerateRandomValueForField(field)
+                    };
+                    continue;
+                }
 
-			// Exclude known system field types
-			if (fieldType is "recordid" or "timestamp")
-				return false;
+                if (field.FieldType?.ToLowerInvariant() is not "numeric" or "work date")
+                    continue;
 
-            // Exclude user fields unless you explicitly handle real user mapping
-            if (fieldType is "user" || fieldType is "multiuser")
-                return false;
+                invalidPart[field.Id.ToString()] = new FieldValueModel
+                {
+                    value = GenerateInvalidValueForField(field)
+                };
+            }
 
-            // Exclude read-only fields
-            if (fieldType is "ICalendarButton")
-                return false;
-
-            // Exclude known system labels; "Order" type field - Quickbase automatically reassigns new value to maintain internal sort order
-            if (label is "date created" or "date modified" or "record id#" or "record owner" or "last modified by" or "assigned to" or "order")
-				return false;
-
-            // Exclude primary key fields
-            if (field.QuickBaseFieldProperties.TryGetValue("PrimaryKey", out var value) && value is bool isPrimaryKey && isPrimaryKey)
-				return false;
-
-            // Exclude fields based on read-only mode
-            if (!string.IsNullOrEmpty(field.Mode) && (field.Mode is "lookup" || field.Mode is "formula" || field.Mode is "summary"))
-                return false;
-
-            return true;
-		}
+            return (requiredPart, invalidPart);
+        }
 
         private static object GenerateRandomValueForField(QuickBaseFieldModel field)
         {
@@ -174,50 +174,46 @@ namespace QuickBaseApi.Client.Factories
 
         private static object GenerateInvalidValueForField(QuickBaseFieldModel field)
         {
-            var random = new Random();
-
             return field.FieldType?.ToLowerInvariant() switch
             {
-                "text" => random.Next(1000),  // Should be string, but giving int
+                "numeric" => "not-a-number",
 
-                "text-multi-line" => 123.456, // Invalid type
-
-                "text-multiple-choice" => "InvalidOption", // Not in choices
-
-                "multitext" => new List<int> { 1, 2, 3 }, // Wrong type inside list
-
-                "rich-text" => false, // Completely invalid format
-
-                "email" => "not-an-email", // Invalid email format
-
-                "url" => "htp://invalid-url", // Malformed URL
-
-                    "numeric" => "not-a-number", // String instead of numeric
-
-                "percent" => 9999, // Way outside valid range
-
-                "rating" => -10, // Invalid rating
-
-                "currency" => "invalid-currency", // Should be numeric
-
-                "duration" => "2 hours", // Should be int or specific format
-
-                "date" => "31-02-2025", // Invalid date
-
-                "datetime" => "not-a-date-time", // Bad datetime format
-
-                "timeofday" => "25:99:99", // Invalid time
-
-                "checkbox" => "maybe", // Should be bool
-
-                "phone" => "123", // Too short
-
-                "user" => new { name = "Not a valid user object" }, // Missing `id`
-
-                "multiuser" => new List<string> { "bad-id" }, // Invalid format
+                "date" => "31-02-2025",
 
                 _ => null
             };
+        }
+
+        public static bool IsWritableField(QuickBaseFieldModel field)
+        {
+            var fieldType = field.FieldType?.ToLowerInvariant();
+            var label = field.Label?.ToLowerInvariant();
+
+            // Exclude known system field types
+            if (fieldType is "recordid" or "timestamp")
+                return false;
+
+            // Exclude user fields unless you explicitly handle real user mapping
+            if (fieldType is "user" || fieldType is "multiuser")
+                return false;
+
+            // Exclude read-only fields
+            if (fieldType is "ICalendarButton")
+                return false;
+
+            // Exclude known system labels; "Order" type field - Quickbase automatically reassigns new value to maintain internal sort order
+            if (label is "date created" or "date modified" or "record id#" or "record owner" or "last modified by" or "assigned to" or "order")
+                return false;
+
+            // Exclude primary key fields
+            if (field.QuickBaseFieldProperties.TryGetValue("PrimaryKey", out var value) && value is bool isPrimaryKey && isPrimaryKey)
+                return false;
+
+            // Exclude fields based on read-only mode
+            if (!string.IsNullOrEmpty(field.Mode) && (field.Mode is "lookup" || field.Mode is "formula" || field.Mode is "summary"))
+                return false;
+
+            return true;
         }
     }
 }

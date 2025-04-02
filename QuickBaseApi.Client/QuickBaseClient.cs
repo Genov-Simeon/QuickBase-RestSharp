@@ -7,17 +7,15 @@ namespace QuickBaseApi.Client
 {
     public class QuickBaseClient
     {
-        private readonly RestClient? _client;
-        private readonly QuickBaseConfig? _config;
+        private readonly RestClient? _restClient;
 
         public QuickBaseClient(QuickBaseConfig config)
         {
-            _config = config;
-            var options = new RestClientOptions(_config.BaseUrl);
-            _client = new RestClient(options);
+            var options = new RestClientOptions(config.BaseUrl);
+            _restClient = new RestClient(options);
 
-            _client.AddDefaultHeader("QB-Realm-Hostname", _config.Realm);
-            _client.AddDefaultHeader("Authorization", $"QB-USER-TOKEN {_config.UserToken}");
+            _restClient.AddDefaultHeader("QB-Realm-Hostname", config.Realm);
+            _restClient.AddDefaultHeader("Authorization", $"QB-USER-TOKEN {config.UserToken}");
         }
 
         public async Task<List<QuickBaseTable>> GetTablesAsync(string appId)
@@ -25,7 +23,7 @@ namespace QuickBaseApi.Client
             var request = new RestRequest("/tables", Method.Get)
                 .AddQueryParameter("appId", appId);
 
-            var response = await _client.ExecuteGetAsync(request);
+            var response = await _restClient.ExecuteGetAsync(request);
 
             if (!response.IsSuccessful)
             {
@@ -42,7 +40,7 @@ namespace QuickBaseApi.Client
             var request = new RestRequest("/fields", Method.Get)
                 .AddQueryParameter("tableId", tableId);
 
-            var response = await _client.ExecuteGetAsync(request);
+            var response = await _restClient.ExecuteGetAsync(request);
 
             if (!response.IsSuccessful)
             {
@@ -54,39 +52,34 @@ namespace QuickBaseApi.Client
             return fields ?? new List<QuickBaseFieldModel>();
         }
 
-        public async Task<(T Content, HttpStatusCode StatusCode)> AddRecordAsync<T>(
-            object record,
-            string? userToken = null)
+        public async Task<(T Content, HttpStatusCode StatusCode)> AddRecordAsync<T>(object requestBody, string? userToken = null)
             where T : class
         {
-            var request = new RestRequest("records/", Method.Post);
-            request.AddJsonBody(record);
+            var request = new RestRequest("/records", Method.Post);
+            request.AddJsonBody(requestBody);
 
             if (!string.IsNullOrWhiteSpace(userToken))
             {
                 request.AddOrUpdateHeader("Authorization", $"QB-USER-TOKEN {userToken}");
             }
 
-            var response = await _client.ExecuteAsync(request);
-
+            var response = await _restClient.ExecuteAsync(request);
             var data = JsonConvert.DeserializeObject<T>(response.Content);
 
-            return (data, response.StatusCode);
+             return (data, response.StatusCode);
         }
 
-        public Task<(CreateRecordResponseModel Content, HttpStatusCode StatusCode)> AddRecordAsync(
-            object record,
-            string? userToken = null)
+        public Task<(CreateRecordResponseModel Content, HttpStatusCode StatusCode)> AddRecordAsync(object record, string? userToken = null)
         {
             return AddRecordAsync<CreateRecordResponseModel>(record, userToken);
         }
 
         public async Task<EditRecordResponseModel> EditRecordAsync(string tableId, string recordId, object record)
         {
-            var request = new RestRequest($"records/{tableId}/{recordId}", Method.Put);
+            var request = new RestRequest($"/records/{tableId}/{recordId}", Method.Put);
             request.AddJsonBody(record);
 
-            var response = await _client.ExecuteAsync(request);
+            var response = await _restClient.ExecuteAsync(request);
             var data = JsonConvert.DeserializeObject<EditRecordResponseModel>(response.Content);
 
             if (!response.IsSuccessful)
@@ -100,7 +93,7 @@ namespace QuickBaseApi.Client
         public async Task DeleteRecordAsync(string tableId, string recordId)
         {
             var request = new RestRequest($"records/{tableId}/{recordId}", Method.Delete);
-            var response = await _client.ExecuteAsync(request);
+            var response = await _restClient.ExecuteAsync(request);
             
             if (!response.IsSuccessful)
             {
