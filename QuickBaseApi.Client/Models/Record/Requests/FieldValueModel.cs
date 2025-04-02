@@ -5,6 +5,6 @@ namespace QuickBaseApi.Client.Models
     public class FieldValueModel
     {
         [JsonProperty("value")]
-        public object value { get; set; }
+        public object? Value { get; set; }
     }
 }

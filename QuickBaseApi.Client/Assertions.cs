@@ -25,8 +25,8 @@ namespace QuickBaseApi.Client
                             Assert.That(actualRecord.ContainsKey(key), Is.True, $"Field '{key}' missing in actual record {i}.");
                             Assert.That(expectedRecord.ContainsKey(key), Is.True, $"Field '{key}' missing in expected record {i}.");
 
-                            var actualValue = actualRecord[key]?.value;
-                            var expectedValue = expectedRecord[key]?.value;
+                            var actualValue = actualRecord[key]?.Value;
+                            var expectedValue = expectedRecord[key]?.Value;
 
                             var actualNormalized = NormalizeValue(actualValue);
                             var expectedNormalized = NormalizeValue(expectedValue);
@@ -59,9 +59,6 @@ namespace QuickBaseApi.Client
                     return ExtractIdFromAngleBrackets(name?.ToString());
             }
 
-            if (value is string stringValue)
-                return StripAppendOnlyPrefix(stringValue);
-
             return value?.ToString();
         }
 
@@ -71,26 +68,6 @@ namespace QuickBaseApi.Client
 
             var match = Regex.Match(input, "<(.*?)>");
             return match.Success ? match.Groups[1].Value : input;
-        }
-
-        private static string StripAppendOnlyPrefix(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return text;
-
-            // If line starts with [ABC-01-23 Name] which
-            var pattern = @"^\[[^\]]+\]\s*";
-            return Regex.Replace(text, pattern, "");
-        }
-
-        public static void AssertRecordCreationSuccess(
-            CreateRecordResponseModel response,
-            List<Dictionary<string, FieldValueModel>> recordList)
-        {
-            Assert.That(response.Metadata.CreatedRecordIds.Count(), Is.EqualTo(recordList.Count()),
-                "Mismatch in the number of created record IDs.");
-
-            Assert.That(response.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(recordList.Count()),
-                "Mismatch in the total number of processed records.");
         }
 
         public static void AssertRequiredFieldsMissingErrorMessage(CreateRecordResponseModel response, List<QuickBaseFieldModel> fields)
@@ -108,28 +85,6 @@ namespace QuickBaseApi.Client
                 foreach (var errorMessage in errorMessages)
                 {
                     bool containsRequiredId = requiredFieldIds.Any(id => errorMessage.Contains($"Missing value for required field with ID \"{id}\""));
-
-                    if (!containsRequiredId)
-                    {
-                        throw new Exception($"Error message on line {lineNumber} does not match any required field ID: {errorMessage}");
-                    }
-                }
-            }
-        }
-
-        public static void AssertIncompatibleFieldsErrorMessage(CreateRecordResponseModel response, Dictionary<string, FieldValueModel> fields)
-        {
-            var ids = new HashSet<string>(fields.Keys);
-
-            foreach (var lineError in response.Metadata.LineErrors)
-            {
-                string lineNumber = lineError.Key;
-                string[] errorMessages = lineError.Value;
-
-                foreach (var errorMessage in errorMessages)
-                { 
-                   
-                    bool containsRequiredId = ids.Any(id => errorMessage.Contains($"Incompatible value for field with ID \"{id}\""));
 
                     if (!containsRequiredId)
                     {

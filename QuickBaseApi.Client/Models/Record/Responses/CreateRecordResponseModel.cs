@@ -8,24 +8,24 @@ namespace QuickBaseApi.Client.Models
         public Dictionary<string, FieldValueModel>[] Data { get; set; }
 
         [JsonProperty("metadata", NullValueHandling = NullValueHandling.Ignore)]
-        public Metadata Metadata { get; set; }
+        public Metadata? Metadata { get; set; }
     }
 
     public class Metadata
     {
         [JsonProperty("createdRecordIds", NullValueHandling = NullValueHandling.Ignore)]
-        public long[] CreatedRecordIds { get; set; }
+        public long[]? CreatedRecordIds { get; set; }
 
         [JsonProperty("lineErrors", NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, string[]> LineErrors { get; set; }
+        public Dictionary<string, string[]>? LineErrors { get; set; }
 
         [JsonProperty("totalNumberOfRecordsProcessed", NullValueHandling = NullValueHandling.Ignore)]
         public long TotalNumberOfRecordsProcessed { get; set; }
 
         [JsonProperty("unchangedRecordIds", NullValueHandling = NullValueHandling.Ignore)]
-        public long[] UnchangedRecordIds { get; set; }
+        public long[]? UnchangedRecordIds { get; set; }
 
         [JsonProperty("updatedRecordIds", NullValueHandling = NullValueHandling.Ignore)]
-        public long[] UpdatedRecordIds { get; set; }
+        public long[]? UpdatedRecordIds { get; set; }
     }
 }

@@ -13,7 +13,7 @@ namespace QuickBaseApi.Tests
         [Test]
         public async Task EditRecord_AllFields_ShouldSucceed()
         {
-            var recordToDelete = GenerateValidRecordForTable(TasksFields, RequiredFieldFilter.All);
+            var recordToDelete = GenerateRecord(TasksFields, RequiredFieldFilter.All);
             var createRequestBody = RecordFactory.CreateRecord(TasksTable.Id, recordToDelete);
             var createResponse = await QuickBaseClient.PostRecordAsync(createRequestBody);
             var createContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(createResponse.Content);

@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace QuickBaseApi.Client.Utils
+﻿namespace QuickBaseApi.Client.Utils
 {
     public static class ErrorResponseMessages
     {

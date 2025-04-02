@@ -13,7 +13,7 @@ namespace QuickBaseApi.Client.Factories
             OnlyOptional
         }
 
-        public static List<Dictionary<string, FieldValueModel>> GenerateValidRecordsForTable(List<QuickBaseFieldModel> fields, RequiredFieldFilter filter = RequiredFieldFilter.All, int maxEntries = 5)
+        public static List<Dictionary<string, FieldValueModel>> GenerateRecords(List<QuickBaseFieldModel> fields, RequiredFieldFilter filter = RequiredFieldFilter.All, int maxEntries = 5)
         {
             var random = new Random();
             int count = random.Next(1, maxEntries + 1);
@@ -22,7 +22,7 @@ namespace QuickBaseApi.Client.Factories
 
             for (int i = 0; i < count; i++)
             {
-                var record = GenerateValidRecordForTable(fields, filter);
+                var record = GenerateRecord(fields, filter);
                 records.Add(record);
             }
 
@@ -30,7 +30,7 @@ namespace QuickBaseApi.Client.Factories
         }
 
 
-        public static Dictionary<string, FieldValueModel> GenerateValidRecordForTable(List<QuickBaseFieldModel> fields, RequiredFieldFilter filter = RequiredFieldFilter.All)
+        public static Dictionary<string, FieldValueModel> GenerateRecord(List<QuickBaseFieldModel> fields, RequiredFieldFilter filter = RequiredFieldFilter.All)
         {
             var record = new Dictionary<string, FieldValueModel>();
 
@@ -49,73 +49,25 @@ namespace QuickBaseApi.Client.Factories
 
                 if (value != null)
                 {
-                    record[field.Id.ToString()] = new FieldValueModel { value = value };
+                    record[field.Id.ToString()] = new FieldValueModel { Value = value };
                 }
             }
 
             return record;
         }
 
-        public static List<(Dictionary<string, FieldValueModel> RequiredRecord, Dictionary<string, FieldValueModel> InvalidRecord)> GenerateInValidRecordsForTable(List<QuickBaseFieldModel> fields, int maxEntries = 5)
-        {
-            var random = new Random();
-            int count = random.Next(1, maxEntries + 1);
-
-            var records = new List<(Dictionary<string, FieldValueModel> RequiredRecord, Dictionary<string, FieldValueModel> InvalidRecord)>();
-
-
-            for (int i = 0; i < count; i++)
-            {
-                var record = GenerateInvalidRecordForTable(fields);
-                records.Add(record);
-            }
-
-            return records;
-        }
-
-        // Add required fields and invalid data restricted to "numeric" and "work date" fields. Other fields not 
-        public static ( Dictionary<string, FieldValueModel> RequiredRecord, Dictionary<string, FieldValueModel> InvalidRecord) GenerateInvalidRecordForTable( List<QuickBaseFieldModel> fields)
-        {
-            var requiredPart = new Dictionary<string, FieldValueModel>();
-            var invalidPart = new Dictionary<string, FieldValueModel>();
-
-            foreach (var field in fields)
-            {
-                if (field.Required == true)
-                {
-                    requiredPart[field.Id.ToString()] = new FieldValueModel
-                    {
-                        value = GenerateRandomValueForField(field)
-                    };
-                    continue;
-                }
-
-                if (field.FieldType?.ToLowerInvariant() is not "numeric" or "work date")
-                    continue;
-
-                invalidPart[field.Id.ToString()] = new FieldValueModel
-                {
-                    value = GenerateInvalidValueForField(field)
-                };
-            }
-
-            return (requiredPart, invalidPart);
-        }
-
         private static object GenerateRandomValueForField(QuickBaseFieldModel field)
         {
             var random = new Random();
 
-            // Helper for extracting choices
             List<string> GetChoices()
             {
-                if (field.QuickBaseFieldProperties != null &&
-                    field.QuickBaseFieldProperties.TryGetValue("choices", out var choicesObj))
+                if (field.QuickBaseFieldProperties != null && field.QuickBaseFieldProperties.TryGetValue("choices", out var choices))
                 {
-                    if (choicesObj is JArray jArray)
+                    if (choices is JArray jArray)
                         return jArray.Select(c => c.ToString()).ToList();
 
-                    return JsonConvert.DeserializeObject<List<string>>(choicesObj.ToString());
+                    return JsonConvert.DeserializeObject<List<string>>(choices.ToString());
                 }
 
                 return null;
@@ -127,13 +79,9 @@ namespace QuickBaseApi.Client.Factories
 
                 "text-multi-line" => $"Multiline example:\nLine {random.Next(1, 100)}\nAnother line {Guid.NewGuid():N}[..5]",
 
-                // extract choices from field properties or use default
-                "text-multiple-choice" => GetChoices()?.OrderBy(_ => random.Next()).FirstOrDefault()
-                                          ?? new[] { "Option1", "Option2", "Option3" }[random.Next(3)],
+                "text-multiple-choice" => GetChoices()?.OrderBy(_ => random.Next()).FirstOrDefault() ?? new[] { "Option1", "Option2", "Option3" }[random.Next(3)],
 
-                // extract choices from field properties or use default
-                "multitext" => GetChoices()?.OrderBy(_ => random.Next()).Take(random.Next(1, 3)).ToList()
-                               ?? new List<string> { "Option A", "Option B" },
+                "multitext" => GetChoices()?.OrderBy(_ => random.Next()).Take(random.Next(1, 3)).ToList() ?? new List<string> { "Option A", "Option B" },
 
                 "rich-text" => $"<b>Rich content {Guid.NewGuid():N}[..4]</b><br><i>Generated at {DateTime.UtcNow:HH:mm:ss}</i>",
 
@@ -153,11 +101,9 @@ namespace QuickBaseApi.Client.Factories
 
                 "date" => DateTime.UtcNow.AddDays(random.Next(-365, 365)).ToString("yyyy-MM-dd"),
 
-                "datetime" => DateTime.UtcNow.AddMinutes(random.Next(-10000, 10000))
-                                   .ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                "datetime" => DateTime.UtcNow.AddMinutes(random.Next(-10000, 10000)).ToString("yyyy-MM-ddTHH:mm:ssZ"),
 
-                "timeofday" => new TimeSpan(random.Next(0, 24), random.Next(0, 60), 0)
-                                   .ToString(@"hh\:mm\:ss"),
+                "timeofday" => new TimeSpan(random.Next(0, 24), random.Next(0, 60), 0).ToString(@"hh\:mm\:ss"),
 
                 "checkbox" => random.NextDouble() > 0.5,
 
@@ -165,21 +111,8 @@ namespace QuickBaseApi.Client.Factories
 
                 "user" => new { id = $"{random.Next(100000, 999999)}.{Guid.NewGuid():N}[..4]" },
 
-                "multiuser" => Enumerable.Range(0, random.Next(1, 3))
-                                        .Select(_ => new { id = $"{random.Next(100000, 999999)}.{Guid.NewGuid():N}[..4]" })
-                                        .ToList(),
-                _ => null
-            };
-        }
-
-        private static object GenerateInvalidValueForField(QuickBaseFieldModel field)
-        {
-            return field.FieldType?.ToLowerInvariant() switch
-            {
-                "numeric" => "not-a-number",
-
-                "date" => "31-02-2025",
-
+                "multiuser" => Enumerable.Range(0, random.Next(1, 3)).Select(_ => new { id = $"{random.Next(100000, 999999)}.{Guid.NewGuid():N}[..4]" }).ToList(),
+                
                 _ => null
             };
         }

@@ -8,9 +8,9 @@ namespace QuickBaseApi.Client.Models
         public string? To { get; set; }
 
         [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
-        public List<Dictionary<string, FieldValueModel>> Data { get; set; }
+        public List<Dictionary<string, FieldValueModel>>? Data { get; set; }
 
         [JsonProperty("fieldsToReturn", NullValueHandling = NullValueHandling.Ignore)]
-        public long[] FieldsToReturn { get; set; }
+        public long[]? FieldsToReturn { get; set; }
     }
 }

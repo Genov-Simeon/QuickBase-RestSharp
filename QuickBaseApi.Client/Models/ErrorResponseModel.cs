@@ -3,8 +3,8 @@
 public class ErrorResponseModel
 {
     [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
-    public string Message { get; set; }
+    public string? Message { get; set; }
 
     [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
-    public string Description { get; set; }
+    public string? Description { get; set; }
 }
