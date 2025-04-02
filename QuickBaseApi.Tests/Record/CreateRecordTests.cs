@@ -1,12 +1,13 @@
 ﻿using Newtonsoft.Json;
 using NUnit.Framework;
 using QuickBaseApi.Client;
-using QuickBaseApi.Client.Factories;
+using QuickBaseApi.Client.Enums;
 using QuickBaseApi.Client.Models;
 using QuickBaseApi.Client.Utils;
 using RestSharp;
 using System.Net;
-using static QuickBaseApi.Client.Factories.FieldValueFactory;
+using static QuickBaseApi.Client.Factories.CreateRecordFactory;
+using static QuickBaseApi.Client.Enums.RequiredFieldFilter;
 
 namespace QuickBaseApi.Tests
 {
@@ -18,7 +19,7 @@ namespace QuickBaseApi.Tests
         {
             var records = GenerateRecords(ProjectsFields);
             var fieldsToReturn = HelperMethods.GetAllFieldIds(records.First());
-            var requestBody = RecordFactory.CreateRecords(ProjectsTable.Id, records, fieldsToReturn.ToArray());
+            var requestBody = CreateRecords(ProjectsTable.Id, records, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
             var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
@@ -38,7 +39,7 @@ namespace QuickBaseApi.Tests
         {
             var records = GenerateRecords(TasksFields);
             var fieldsToReturn = HelperMethods.GetAllFieldIds(records.First());
-            var requestBody = RecordFactory.CreateRecords(TasksTable.Id, records, fieldsToReturn.ToArray());
+            var requestBody = CreateRecords(TasksTable.Id, records, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
             var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
@@ -56,9 +57,10 @@ namespace QuickBaseApi.Tests
         [Test]
         public async Task AddRecord_AllFields_ShouldSucceed()
         {
-            var record = GenerateRecord(TasksFields, RequiredFieldFilter.All);
+
+            var record = GenerateRecord(TasksFields, All);
             var fieldsToReturn = HelperMethods.GetAllFieldIds(record);
-            var requestBody = RecordFactory.CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
+            var requestBody = CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
             var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
@@ -76,9 +78,9 @@ namespace QuickBaseApi.Tests
         [Test]
         public async Task AddRecord_RequredFields_ShouldSucceed()
         {
-            var record = GenerateRecord(TasksFields, RequiredFieldFilter.OnlyRequired);
+            var record = GenerateRecord(TasksFields, OnlyRequired);
             var fieldsToReturn = HelperMethods.GetAllFieldIds(record);
-            var requestBody = RecordFactory.CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
+            var requestBody = CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
             var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
@@ -96,9 +98,9 @@ namespace QuickBaseApi.Tests
         [Test]
         public async Task AddRecord_OptionalFields_ShoudReturnMultiStatus()
         {
-            var record = GenerateRecord(TasksFields, RequiredFieldFilter.OnlyOptional);
+            var record = GenerateRecord(TasksFields, OnlyOptional);
             var fieldsToReturn = HelperMethods.GetAllFieldIds(record);
-            var requestBody = RecordFactory.CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
+            var requestBody = CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
             var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
@@ -118,7 +120,7 @@ namespace QuickBaseApi.Tests
         {
             var token = "Wrong User Token";
             var record = GenerateRecord(TasksFields);
-            var requestBody = RecordFactory.CreateRecord(TasksTable.Id, record);
+            var requestBody = CreateRecord(TasksTable.Id, record);
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody, token);
             var responseContent = JsonConvert.DeserializeObject<ErrorResponseModel>(response.Content);
@@ -136,7 +138,7 @@ namespace QuickBaseApi.Tests
         {
             var invalidTableId = HelperMethods.RandomString(10);
             var record = GenerateRecord(TasksFields);
-            var requestBody = RecordFactory.CreateRecord(invalidTableId, record);
+            var requestBody = CreateRecord(invalidTableId, record);
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
             var responseContent = JsonConvert.DeserializeObject<ErrorResponseModel>(response.Content);
@@ -152,8 +154,8 @@ namespace QuickBaseApi.Tests
         [Test]
         public async Task AddRecord_WithInvalidTableId_ShouldReturnErrorMessage()
         {
-            var record = GenerateRecord(TasksFields, RequiredFieldFilter.OnlyRequired);
-            var requestBody = RecordFactory.CreateRecord(null, record);
+            var record = GenerateRecord(TasksFields, OnlyRequired);
+            var requestBody = CreateRecord(null, record);
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
             var responseContent = JsonConvert.DeserializeObject<ErrorResponseModel>(response.Content);
@@ -203,8 +205,8 @@ namespace QuickBaseApi.Tests
         {
             RestClient = new RestClient(new RestClientOptions(Config.BaseUrl));
             RestClient.AddDefaultHeader("Authorization", $"QB-USER-TOKEN {Config.UserToken}");
-            var record = GenerateRecord(TasksFields, RequiredFieldFilter.All);
-            var requestBody = RecordFactory.CreateRecord(TasksTable.Id, record);
+            var record = GenerateRecord(TasksFields, All);
+            var requestBody = CreateRecord(TasksTable.Id, record);
 
             var request = new RestRequest("/records", Method.Post).AddJsonBody(requestBody);
 
@@ -218,8 +220,8 @@ namespace QuickBaseApi.Tests
         {
             RestClient = new RestClient(new RestClientOptions(Config.BaseUrl));
             RestClient.AddDefaultHeader("QB-Realm-Hostname", Config.Realm);
-            var record = GenerateRecord(TasksFields, RequiredFieldFilter.All);
-            var requestBody = RecordFactory.CreateRecord(TasksTable.Id, record);
+            var record = GenerateRecord(TasksFields, All);
+            var requestBody = CreateRecord(TasksTable.Id, record);
 
             var request = new RestRequest("/records", Method.Post).AddJsonBody(requestBody);
 

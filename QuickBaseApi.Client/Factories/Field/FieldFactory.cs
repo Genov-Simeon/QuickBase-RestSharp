@@ -4,74 +4,11 @@ using QuickBaseApi.Client.Models;
 
 namespace QuickBaseApi.Client.Factories
 {
-    public static class FieldValueFactory
+    public static class FieldFactory
     {
-        public enum RequiredFieldFilter
-        {
-            All,            
-            OnlyRequired,   
-            OnlyOptional
-        }
-
-        public static List<Dictionary<string, FieldValueModel>> GenerateRecords(List<QuickBaseFieldModel> fields, RequiredFieldFilter filter = RequiredFieldFilter.All, int maxEntries = 5)
+        public static object GenerateRandomValueForField(QuickBaseFieldModel field)
         {
             var random = new Random();
-            int count = random.Next(1, maxEntries + 1);
-
-            var records = new List<Dictionary<string, FieldValueModel>>();
-
-            for (int i = 0; i < count; i++)
-            {
-                var record = GenerateRecord(fields, filter);
-                records.Add(record);
-            }
-
-            return records;
-        }
-
-
-        public static Dictionary<string, FieldValueModel> GenerateRecord(List<QuickBaseFieldModel> fields, RequiredFieldFilter filter = RequiredFieldFilter.All)
-        {
-            var record = new Dictionary<string, FieldValueModel>();
-
-            foreach (var field in fields)
-            {
-                if (!IsWritableField(field))
-                    continue;
-
-                if (filter == RequiredFieldFilter.OnlyRequired && field.Required != true)
-                    continue;
-
-                if (filter == RequiredFieldFilter.OnlyOptional && field.Required == true)
-                    continue;
-
-                var value = GenerateRandomValueForField(field);
-
-                if (value != null)
-                {
-                    record[field.Id.ToString()] = new FieldValueModel { Value = value };
-                }
-            }
-
-            return record;
-        }
-
-        private static object GenerateRandomValueForField(QuickBaseFieldModel field)
-        {
-            var random = new Random();
-
-            List<string> GetChoices()
-            {
-                if (field.QuickBaseFieldProperties != null && field.QuickBaseFieldProperties.TryGetValue("choices", out var choices))
-                {
-                    if (choices is JArray jArray)
-                        return jArray.Select(c => c.ToString()).ToList();
-
-                    return JsonConvert.DeserializeObject<List<string>>(choices.ToString());
-                }
-
-                return null;
-            }
 
             return field.FieldType?.ToLowerInvariant() switch
             {
@@ -79,9 +16,9 @@ namespace QuickBaseApi.Client.Factories
 
                 "text-multi-line" => $"Multiline example:\nLine {random.Next(1, 100)}\nAnother line {Guid.NewGuid():N}[..5]",
 
-                "text-multiple-choice" => GetChoices()?.OrderBy(_ => random.Next()).FirstOrDefault() ?? new[] { "Option1", "Option2", "Option3" }[random.Next(3)],
+                "text-multiple-choice" => GetChoices(field)?.OrderBy(_ => random.Next()).FirstOrDefault() ?? new[] { "Option1", "Option2", "Option3" }[random.Next(3)],
 
-                "multitext" => GetChoices()?.OrderBy(_ => random.Next()).Take(random.Next(1, 3)).ToList() ?? new List<string> { "Option A", "Option B" },
+                "multitext" => GetChoices(field)?.OrderBy(_ => random.Next()).Take(random.Next(1, 3)).ToList() ?? new List<string> { "Option A", "Option B" },
 
                 "rich-text" => $"<b>Rich content {Guid.NewGuid():N}[..4]</b><br><i>Generated at {DateTime.UtcNow:HH:mm:ss}</i>",
 
@@ -109,12 +46,26 @@ namespace QuickBaseApi.Client.Factories
 
                 "phone" => $"({random.Next(100, 999)}) {random.Next(100, 999)}-{random.Next(1000, 9999)}",
 
-                "user" => new { id = $"{random.Next(100000, 999999)}.{Guid.NewGuid():N}[..4]" },
+                "user" => new { id = $" User {random.Next(100000, 999999)}.{Guid.NewGuid():N}[..4]" },
 
                 "multiuser" => Enumerable.Range(0, random.Next(1, 3)).Select(_ => new { id = $"{random.Next(100000, 999999)}.{Guid.NewGuid():N}[..4]" }).ToList(),
                 
                 _ => null
             };
+        }
+
+        private static List<string> GetChoices(QuickBaseFieldModel field)
+        {
+            if (field.QuickBaseFieldProperties != null &&
+                field.QuickBaseFieldProperties.TryGetValue("choices", out var choices))
+            {
+                if (choices is JArray jArray)
+                    return jArray.Select(c => c.ToString()).ToList();
+
+                return JsonConvert.DeserializeObject<List<string>>(choices.ToString());
+            }
+
+            return null;
         }
 
         public static bool IsWritableField(QuickBaseFieldModel field)
