@@ -1,4 +1,4 @@
-namespace QuickBaseApi.Client
+namespace QuickBaseApi.Client.Models
 {
     public class QuickBaseConfig
     {

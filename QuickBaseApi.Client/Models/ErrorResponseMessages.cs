@@ -1,4 +1,4 @@
-﻿namespace QuickBaseApi.Client.Utils
+﻿namespace QuickBaseApi.Client.Models
 {
     public static class ErrorResponseMessages
     {
@@ -26,7 +26,7 @@
             Description = "'to' should be string"
         };
 
-        public static readonly ErrorResponseModel MissingAuthorizationHeader  = new ErrorResponseModel
+        public static readonly ErrorResponseModel MissingAuthorizationHeader = new ErrorResponseModel
         {
             Message = "Bad Request",
             Description = "Required header 'authorization' not found"

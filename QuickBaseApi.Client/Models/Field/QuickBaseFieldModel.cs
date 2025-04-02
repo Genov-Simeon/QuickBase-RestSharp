@@ -17,10 +17,10 @@ namespace QuickBaseApi.Client.Models
         public bool? DoesDataCopy { get; set; }
 
         [JsonProperty("fieldHelp", NullValueHandling = NullValueHandling.Ignore)]
-        public string FieldHelp { get; set; }
+        public string? FieldHelp { get; set; }
 
         [JsonProperty("fieldType", NullValueHandling = NullValueHandling.Ignore)]
-        public string FieldType { get; set; }
+        public string? FieldType { get; set; }
 
         [JsonProperty("findEnabled", NullValueHandling = NullValueHandling.Ignore)]
         public bool? FindEnabled { get; set; }
@@ -29,16 +29,16 @@ namespace QuickBaseApi.Client.Models
         public int? Id { get; set; }
 
         [JsonProperty("label", NullValueHandling = NullValueHandling.Ignore)]
-        public string Label { get; set; }
+        public string? Label { get; set; }
 
         [JsonProperty("mode", NullValueHandling = NullValueHandling.Ignore)]
-        public string Mode { get; set; }
+        public string? Mode { get; set; }
 
         [JsonProperty("noWrap", NullValueHandling = NullValueHandling.Ignore)]
         public bool? NoWrap { get; set; }
 
         [JsonProperty("properties", NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, object> QuickBaseFieldProperties { get; set; }
+        public Dictionary<string, object>? QuickBaseFieldProperties { get; set; }
 
         [JsonProperty("required", NullValueHandling = NullValueHandling.Ignore)]
         public bool? Required { get; set; }

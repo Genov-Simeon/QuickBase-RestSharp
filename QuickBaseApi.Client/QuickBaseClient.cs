@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using QuickBaseApi.Client.Models;
 using RestSharp;
-using System.Net;
 
 namespace QuickBaseApi.Client
 {

@@ -20,13 +20,13 @@ namespace QuickBaseApi.Client.Models
         public bool? CarryChoices { get; set; }
 
         [JsonProperty("defaultValue", NullValueHandling = NullValueHandling.Ignore)]
-        public string DefaultValue { get; set; }
+        public string? DefaultValue { get; set; }
 
         [JsonProperty("foreignKey", NullValueHandling = NullValueHandling.Ignore)]
         public bool? ForeignKey { get; set; }
 
         [JsonProperty("formula", NullValueHandling = NullValueHandling.Ignore)]
-        public string Formula { get; set; }
+        public string? Formula { get; set; }
 
         [JsonProperty("maxLength", NullValueHandling = NullValueHandling.Ignore)]
         public int? MaxLength { get; set; }
@@ -44,13 +44,13 @@ namespace QuickBaseApi.Client.Models
         public int? Width { get; set; }
 
         [JsonProperty("choices", NullValueHandling = NullValueHandling.Ignore)]
-        public List<string> Choices { get; set; }
+        public List<string>? Choices { get; set; }
 
         [JsonProperty("displayUser", NullValueHandling = NullValueHandling.Ignore)]
-        public string DisplayUser { get; set; }
+        public string? DisplayUser { get; set; }
 
         [JsonProperty("summaryFunction", NullValueHandling = NullValueHandling.Ignore)]
-        public string SummaryFunction { get; set; }
+        public string? SummaryFunction { get; set; }
 
         [JsonProperty("summaryReferenceFieldId", NullValueHandling = NullValueHandling.Ignore)]
         public int? SummaryReferenceFieldId { get; set; }
@@ -65,10 +65,10 @@ namespace QuickBaseApi.Client.Models
         public bool? UseNewWindow { get; set; }
 
         [JsonProperty("linkText", NullValueHandling = NullValueHandling.Ignore)]
-        public string LinkText { get; set; }
+        public string? LinkText { get; set; }
 
         [JsonProperty("targetTableId", NullValueHandling = NullValueHandling.Ignore)]
-        public string TargetTableId { get; set; }
+        public string? TargetTableId { get; set; }
 
         [JsonProperty("sourceFieldId", NullValueHandling = NullValueHandling.Ignore)]
         public int? SourceFieldId { get; set; }
@@ -77,7 +77,7 @@ namespace QuickBaseApi.Client.Models
         public int? TargetFieldId { get; set; }
 
         [JsonProperty("versionMode", NullValueHandling = NullValueHandling.Ignore)]
-        public string VersionMode { get; set; }
+        public string? VersionMode { get; set; }
 
         [JsonProperty("seeVersions", NullValueHandling = NullValueHandling.Ignore)]
         public bool? SeeVersions { get; set; }
