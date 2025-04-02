@@ -11,9 +11,9 @@ namespace QuickBaseApi.Tests
     public class DeleteRecordTests : BaseTest
     {
         [Test]
-        public async Task DeleteRecord_ShouldSucceed()
+        public async Task EditRecord_AllFields_ShouldSucceed()
         {
-            var recordToDelete = GenerateValidRecordForTable(TasksFields, RequiredFieldFilter.OnlyRequired);
+            var recordToDelete = GenerateValidRecordForTable(TasksFields, RequiredFieldFilter.All);
             var createRequestBody = RecordFactory.CreateRecord(TasksTable.Id, recordToDelete);
             var createResponse = await QuickBaseClient.PostRecordAsync(createRequestBody);
             var createContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(createResponse.Content);
