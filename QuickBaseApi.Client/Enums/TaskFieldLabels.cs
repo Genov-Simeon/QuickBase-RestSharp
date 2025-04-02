@@ -1,0 +1,39 @@
+﻿namespace QuickBaseApi.Client.Enums
+{
+    public enum TaskFieldLabels
+    {
+        TaskName,
+        ProjectName,
+        Start,
+        Milestone,
+        ProjectPhase,
+        TC,
+        AssignedTo,
+        NumberOfHoursAllocating,
+        Duration,
+        ProjectedFinish,
+        DaysOverdue,
+        Priority,
+        Status,
+        PercentComplete,
+        DateComplete,
+        Description,
+        HistoryNotesIssues,
+        ICalendar,
+        LastModifiedBy,
+        PC,
+        Predecessors,
+        ProjectTask,
+        ProjectManager,
+        ProjectStatus,
+        RecordOwner,
+        RelatedProject,
+        ResourceName,
+        Successors,
+        Order,
+        TaskConditionLegend,
+        Text,
+        NewTextField,
+        TaskID
+    }
+}

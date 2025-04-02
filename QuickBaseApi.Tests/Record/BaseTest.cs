@@ -3,7 +3,7 @@ using NUnit.Framework;
 using RestSharp;
 using QuickBaseApi.Client;
 using QuickBaseApi.Client.Models;
-using static QuickBaseApi.Client.Utils.FieldHelper
+using static QuickBaseApi.Client.Utils.FieldHelper;
 
 namespace QuickBaseApi.Tests
 {
@@ -21,6 +21,7 @@ namespace QuickBaseApi.Tests
         protected List<QuickBaseFieldModel>? ProjectsFields { get; set; }
         protected QuickBaseTable? TasksTable { get; set; }
         protected List<QuickBaseFieldModel>? TasksFields { get; set; }
+        protected List<string>? TasksFieldLabels { get; set; }
 
         [OneTimeSetUp]
         public async Task OneTimeSetUpAsync()
@@ -34,6 +35,8 @@ namespace QuickBaseApi.Tests
 
             ProjectsFields = GetWritableFields(await QuickBaseClient.GetFieldsByTableName(ProjectsTable.Id));
             TasksFields = GetWritableFields(await QuickBaseClient.GetFieldsByTableName(TasksTable.Id));
+
+            TasksFieldLabels = GetAllFieldLabels(TasksFields);
         }
     }
 }

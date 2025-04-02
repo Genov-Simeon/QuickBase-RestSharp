@@ -19,7 +19,7 @@ namespace QuickBaseApi.Client.Factories
 
         public static DeleteRecordModel DeleteByCondition(string tableId, List<QuickBaseFieldModel> fields, Func<QuickBaseFieldModel, bool> matchField, object value, QueryOperator op = QueryOperator.EX)
         {
-            var fieldId = FieldHelper.GetFieldId(fields, matchField);
+            var fieldId = FieldHelper.GetFieldIdByCondition(fields, matchField);
 
             if (fieldId == null)
                 throw new ArgumentException("No matching field found for the given condition.");

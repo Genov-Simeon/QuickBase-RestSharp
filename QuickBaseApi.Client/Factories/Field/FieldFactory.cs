@@ -1,11 +1,23 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using QuickBaseApi.Client.Models;
+using QuickBaseApi.Client.Utils;
 
 namespace QuickBaseApi.Client.Factories
 {
     public static class FieldFactory
     {
+        public static Dictionary<string, FieldValueModel> GenerateRandomFieldValue(List<QuickBaseFieldModel> fields)
+        {
+            var optionalField = FieldHelper.GetRandomField(fields);
+            var value = GenerateRandomValueForField(optionalField);
+
+            return new Dictionary<string, FieldValueModel>
+            {
+                [optionalField.Id.ToString()] = new FieldValueModel { Value = value }
+            };
+        }
+
         public static object GenerateRandomValueForField(QuickBaseFieldModel field)
         {
             var random = new Random();

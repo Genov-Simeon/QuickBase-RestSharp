@@ -14,13 +14,13 @@ namespace QuickBaseApi.Tests
         [Test]
         public async Task EditRecord_AllFields_ShouldSucceed()
         {
-            var originalRecord = GenerateRecord(TasksFields, RequiredFieldFilter.All);            
+            var originalRecord = GenerateRecord(TasksFields);            
             var createRequestBody = CreateRecord(TasksTable.Id, originalRecord);
             var createResponse = await QuickBaseClient.PostRecordAsync(createRequestBody);
             var createResponseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(createResponse.Content);
             var recordId = createResponseContent.Metadata.CreatedRecordIds.First().ToString();
 
-            var updatedRecord = GenerateRecord(TasksFields, RequiredFieldFilter.All);
+            var updatedRecord = GenerateRecord(TasksFields);
             updatedRecord["3"] = new FieldValueModel { Value = recordId };
             var fieldsToReturn = HelperMethods.GetAllFieldIds(updatedRecord);
             var updateRequestBody = CreateRecord(TasksTable.Id, updatedRecord, fieldsToReturn.ToArray());
