@@ -1,5 +1,4 @@
-﻿using QuickBaseApi.Client.Enums;
-using QuickBaseApi.Client.Models;
+﻿using QuickBaseApi.Client.Models;
 using static QuickBaseApi.Client.Factories.FieldFactory;
 
 namespace QuickBaseApi.Client.Factories
@@ -28,7 +27,7 @@ namespace QuickBaseApi.Client.Factories
             };
         }
 
-        public static List<Dictionary<string, FieldValueModel>> GenerateRecords(List<QuickBaseFieldModel> fields, int maxEntries = 5)
+        public static List<Dictionary<string, FieldValueModel>> GenerateRecords(List<FieldModel> fields, int maxEntries = 5)
         {
             var random = new Random();
             int count = random.Next(1, maxEntries + 1);
@@ -45,7 +44,7 @@ namespace QuickBaseApi.Client.Factories
         }
 
 
-        public static Dictionary<string, FieldValueModel> GenerateRecord(List<QuickBaseFieldModel> fields, Func<QuickBaseFieldModel, bool> predicate = null)
+        public static Dictionary<string, FieldValueModel> GenerateRecord(List<FieldModel> fields, Func<FieldModel, bool> predicate = null)
         {
             var record = new Dictionary<string, FieldValueModel>();
 
@@ -59,28 +58,6 @@ namespace QuickBaseApi.Client.Factories
                 if (value != null)
                 {
                     record[field.Id.ToString()] = new FieldValueModel { Value = value };
-                }
-            }
-
-            return record;
-        }
-
-        public static Dictionary<string, FieldValueModel> GenerateRecordWithExtraFields(List<QuickBaseFieldModel> fields, Func<QuickBaseFieldModel, bool> predicate = null, params string[] extraFieldLabels)
-        {
-            var record = GenerateRecord(fields);
-
-            foreach (var label in extraFieldLabels)
-            {
-                var extraField = fields.FirstOrDefault(f =>
-                    f.Label?.Equals(label, StringComparison.OrdinalIgnoreCase) == true);
-
-                if (extraField != null)
-                {
-                    var value = GenerateRandomValueForField(extraField);
-                    if (value != null)
-                    {
-                        record[extraField.Id.ToString()] = new FieldValueModel { Value = value };
-                    }
                 }
             }
 

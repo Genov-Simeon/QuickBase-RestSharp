@@ -16,12 +16,11 @@ namespace QuickBaseApi.Tests
         protected RestClient? RestClient { get; set; }
         protected QuickBaseConfig? Config { get; set; }
 
-        protected List<QuickBaseTable>? Tables { get; set; }
-        protected QuickBaseTable? ProjectsTable { get; set; }
-        protected List<QuickBaseFieldModel>? ProjectsFields { get; set; }
-        protected QuickBaseTable? TasksTable { get; set; }
-        protected List<QuickBaseFieldModel>? TasksFields { get; set; }
-        protected List<string>? TasksFieldLabels { get; set; }
+        protected List<TableModel>? Tables { get; set; }
+        protected TableModel? ProjectsTable { get; set; }
+        protected List<FieldModel>? ProjectsFields { get; set; }
+        protected TableModel? TasksTable { get; set; }
+        protected List<FieldModel>? TasksFields { get; set; }
 
         [OneTimeSetUp]
         public async Task OneTimeSetUpAsync()
@@ -35,8 +34,6 @@ namespace QuickBaseApi.Tests
 
             ProjectsFields = GetWritableFields(await QuickBaseClient.GetFieldsByTableName(ProjectsTable.Id));
             TasksFields = GetWritableFields(await QuickBaseClient.GetFieldsByTableName(TasksTable.Id));
-
-            TasksFieldLabels = GetAllFieldLabels(TasksFields);
         }
     }
 }

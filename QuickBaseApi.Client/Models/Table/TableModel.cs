@@ -2,7 +2,7 @@
 
 namespace QuickBaseApi.Client.Models
 {
-    public class QuickBaseTable
+    public class TableModel
     {
         [JsonProperty("alias", NullValueHandling = NullValueHandling.Ignore)]
         public string? Alias { get; set; }

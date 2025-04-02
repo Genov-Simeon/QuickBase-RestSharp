@@ -2,7 +2,7 @@
 
 namespace QuickBaseApi.Client.Models
 {
-    public class QuickBaseFieldModel
+    public class FieldModel
     {
         [JsonProperty("appearsByDefault", NullValueHandling = NullValueHandling.Ignore)]
         public bool? AppearsByDefault { get; set; }

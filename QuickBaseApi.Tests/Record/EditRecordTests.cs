@@ -1,11 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Net;
+using Newtonsoft.Json;
 using NUnit.Framework;
+using QuickBaseApi.Client;
 using QuickBaseApi.Client.Models;
 using QuickBaseApi.Client.Utils;
-using QuickBaseApi.Client;
 using static QuickBaseApi.Client.Factories.CreateRecordFactory;
-using System.Net;
-using QuickBaseApi.Client.Enums;
 
 namespace QuickBaseApi.Tests
 {
@@ -22,7 +21,7 @@ namespace QuickBaseApi.Tests
 
             var updatedRecord = GenerateRecord(TasksFields);
             updatedRecord["3"] = new FieldValueModel { Value = recordId };
-            var fieldsToReturn = HelperMethods.GetAllFieldIds(updatedRecord);
+            var fieldsToReturn = FieldHelper.GetAllFieldIds(updatedRecord);
             var updateRequestBody = CreateRecord(TasksTable.Id, updatedRecord, fieldsToReturn.ToArray());
 
             var editResponse = await QuickBaseClient.PostRecordAsync(updateRequestBody);

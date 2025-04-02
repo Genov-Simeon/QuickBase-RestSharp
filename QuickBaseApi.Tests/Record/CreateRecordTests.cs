@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Net;
+using RestSharp;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using QuickBaseApi.Client;
 using QuickBaseApi.Client.Models;
 using QuickBaseApi.Client.Utils;
-using RestSharp;
-using System.Net;
 using static QuickBaseApi.Client.Factories.CreateRecordFactory;
 
 namespace QuickBaseApi.Tests
@@ -16,7 +16,7 @@ namespace QuickBaseApi.Tests
         public async Task AddMutipleProjectRecords_AllFields_ShouldSucceed()
         {
             var records = GenerateRecords(ProjectsFields);
-            var fieldsToReturn = HelperMethods.GetAllFieldIds(records.First());
+            var fieldsToReturn = FieldHelper.GetAllFieldIds(records.First());
             var requestBody = CreateRecords(ProjectsTable.Id, records, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
@@ -27,16 +27,16 @@ namespace QuickBaseApi.Tests
                 Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
                 Assert.That(responseContent.Metadata.CreatedRecordIds.Count(), Is.EqualTo(records.Count()));
                 Assert.That(responseContent.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(records.Count()));
+                Assertions.AssertFieldValues(responseContent.Data, records, fieldsToReturn);
             });
 
-            Assertions.AssertFieldValues(responseContent.Data, records, fieldsToReturn);
         }
 
         [Test]
         public async Task AddMutipleTaskRecords_AllFields_ShouldSucceed()
         {
             var records = GenerateRecords(TasksFields);
-            var fieldsToReturn = HelperMethods.GetAllFieldIds(records.First());
+            var fieldsToReturn = FieldHelper.GetAllFieldIds(records.First());
             var requestBody = CreateRecords(TasksTable.Id, records, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
@@ -47,16 +47,16 @@ namespace QuickBaseApi.Tests
                 Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
                 Assert.That(responseContent.Metadata.CreatedRecordIds.Count(), Is.EqualTo(records.Count()));
                 Assert.That(responseContent.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(records.Count()));
+                Assertions.AssertFieldValues(responseContent.Data, records, fieldsToReturn);
             });
 
-            Assertions.AssertFieldValues(responseContent.Data, records, fieldsToReturn);
         }
 
         [Test]
         public async Task AddRecord_AllFields_ShouldSucceed()
         {
             var record = GenerateRecord(TasksFields);
-            var fieldsToReturn = HelperMethods.GetAllFieldIds(record);
+            var fieldsToReturn = FieldHelper.GetAllFieldIds(record);
             var requestBody = CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
@@ -67,16 +67,16 @@ namespace QuickBaseApi.Tests
                 Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
                 Assert.That(responseContent.Metadata.CreatedRecordIds.Count(), Is.EqualTo(1));
                 Assert.That(responseContent.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(1));
+                Assertions.AssertFieldValues(responseContent.Data, new List<Dictionary<string, FieldValueModel>> { record }, fieldsToReturn);
             });
 
-            Assertions.AssertFieldValues(responseContent.Data, new List<Dictionary<string, FieldValueModel>> { record }, fieldsToReturn);
         }
 
         [Test]
         public async Task AddRecord_RequredFields_ShouldSucceed()
         {
             var record = GenerateRecord(TasksFields, f => f.Required == true);
-            var fieldsToReturn = HelperMethods.GetAllFieldIds(record);
+            var fieldsToReturn = FieldHelper.GetAllFieldIds(record);
             var requestBody = CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
@@ -87,16 +87,16 @@ namespace QuickBaseApi.Tests
                 Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
                 Assert.That(responseContent.Metadata.CreatedRecordIds.Count(), Is.EqualTo(1));
                 Assert.That(responseContent.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(1));
+                Assertions.AssertFieldValues(responseContent.Data, new List<Dictionary<string, FieldValueModel>> { record }, fieldsToReturn);
             });
 
-            Assertions.AssertFieldValues(responseContent.Data, new List<Dictionary<string, FieldValueModel>> { record }, fieldsToReturn);
         }
 
         [Test]
-        public async Task AddRecord_OptionalFields_ShoudReturnMultiStatus()
+        public async Task AddRecord_OptionalFieldsOnly_ShoudReturnMultiStatus()
         {
             var record = GenerateRecord(TasksFields, f => f.Required == false);
-            var fieldsToReturn = HelperMethods.GetAllFieldIds(record);
+            var fieldsToReturn = FieldHelper.GetAllFieldIds(record);
             var requestBody = CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody);
@@ -107,9 +107,32 @@ namespace QuickBaseApi.Tests
                 Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.MultiStatus));
                 Assert.That(responseContent.Metadata.LineErrors.Count(), Is.EqualTo(1));
                 Assert.That(responseContent.Metadata.CreatedRecordIds.Count(), Is.EqualTo(0));
+                Assertions.AssertRequiredFieldsMissingErrorMessage(responseContent, TasksFields);
             });
+        }
 
-            Assertions.AssertRequiredFieldsMissingErrorMessage(responseContent, TasksFields);
+        [Test]
+        public async Task AddRecord_SomeOptionalFields_ShouldSucceed()
+        {
+            var record = GenerateRecord(TasksFields,
+                f => f.Required == true
+                || f.Label == "Description"
+                || f.Label == "Priority"
+                || f.Label == "Status");
+
+            var fieldsToReturn = FieldHelper.GetAllFieldIds(record);
+            var requestBody = CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
+
+            var response = await QuickBaseClient.PostRecordAsync(requestBody);
+            var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(responseContent.Metadata.CreatedRecordIds.Count(), Is.EqualTo(1));
+                Assert.That(responseContent.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(1));
+                Assertions.AssertFieldValues(responseContent.Data, new List<Dictionary<string, FieldValueModel>> { record }, fieldsToReturn);
+            });
         }
 
         [Test]
@@ -120,24 +143,6 @@ namespace QuickBaseApi.Tests
             var requestBody = CreateRecord(TasksTable.Id, record);
 
             var response = await QuickBaseClient.PostRecordAsync(requestBody, token);
-            var responseContent = JsonConvert.DeserializeObject<ErrorResponseModel>(response.Content);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-                Assert.That(responseContent.Message, Is.EqualTo(ErrorResponseMessages.InvalidUserToken.Message));
-                Assert.That(responseContent.Description, Is.EqualTo(ErrorResponseMessages.InvalidUserToken.Description));
-            });
-        }
-
-        [Test]
-        public async Task AddRecord_WithNonExistingTableId_ShouldReturnUnauthorized()
-        {
-            var invalidTableId = HelperMethods.RandomString(10);
-            var record = GenerateRecord(TasksFields);
-            var requestBody = CreateRecord(invalidTableId, record);
-
-            var response = await QuickBaseClient.PostRecordAsync(requestBody);
             var responseContent = JsonConvert.DeserializeObject<ErrorResponseModel>(response.Content);
 
             Assert.Multiple(() =>

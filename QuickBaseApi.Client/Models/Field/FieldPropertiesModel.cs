@@ -2,7 +2,7 @@
 
 namespace QuickBaseApi.Client.Models
 {
-    public class QuickBaseFieldPropertiesModel
+    public class FieldPropertiesModel
     {
         [JsonProperty("allowHTML", NullValueHandling = NullValueHandling.Ignore)]
         public bool? AllowHtml { get; set; }

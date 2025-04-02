@@ -70,7 +70,7 @@ namespace QuickBaseApi.Client
             return match.Success ? match.Groups[1].Value : input;
         }
 
-        public static void AssertRequiredFieldsMissingErrorMessage(CreateRecordResponseModel response, List<QuickBaseFieldModel> fields)
+        public static void AssertRequiredFieldsMissingErrorMessage(CreateRecordResponseModel response, List<FieldModel> fields)
         {
             var requiredFieldIds = fields
                 .Where(f => f.Required == true)

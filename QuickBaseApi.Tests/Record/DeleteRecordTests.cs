@@ -1,12 +1,12 @@
 ﻿using System.Net;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using QuickBaseApi.Client.Enums;
 using QuickBaseApi.Client.Factories;
 using QuickBaseApi.Client.Models;
-using QuickBaseApi.Client.Enums;
-using static QuickBaseApi.Client.Factories.CreateRecordFactory;
-using static QuickBaseApi.Client.Factories.FieldFactory;
 using static QuickBaseApi.Client.Utils.FieldHelper;
+using static QuickBaseApi.Client.Factories.FieldFactory;
+using static QuickBaseApi.Client.Factories.CreateRecordFactory;
 
 namespace QuickBaseApi.Tests
 {
@@ -24,7 +24,7 @@ namespace QuickBaseApi.Tests
             var createResponse = await QuickBaseClient.PostRecordAsync(createRequest);
             var createdRecordId = JsonConvert.DeserializeObject<CreateRecordResponseModel>(createResponse.Content).Metadata.CreatedRecordIds.First();
 
-            var deleteRequest = DeleteRecordFactory.DeleteByFieldId(TasksTable.Id, createdRecordId);
+            var deleteRequest = DeleteRecordFactory.DeleteRecord(TasksTable.Id, fieldId: "3", QueryOperator.EX, createdRecordId);
 
             var deleteResponse = await QuickBaseClient.DeleteRecordAsync(deleteRequest);
             var deleteResult = JsonConvert.DeserializeObject<DeleteRecordResponseModel>(deleteResponse.Content);
@@ -37,7 +37,7 @@ namespace QuickBaseApi.Tests
         }
 
         [Test]
-        public async Task DeleteRecord_ByCondition_ShouldSucceed()
+        public async Task DeleteRecord_ByFieldValue_ShouldSucceed()
         {
             var recordToDelete = GenerateRecord(TasksFields, f => f.Required == true);
             var field = GetRandomField(TasksFields, f => f.Required == false);
@@ -46,38 +46,18 @@ namespace QuickBaseApi.Tests
 
             var createRequest = CreateRecord(TasksTable.Id, recordToDelete);
             var createResponse = await QuickBaseClient.PostRecordAsync(createRequest);
-            var recordId = JsonConvert.DeserializeObject<CreateRecordResponseModel>(createResponse.Content).Metadata.CreatedRecordIds.First();
+            var createdRecordId = JsonConvert.DeserializeObject<CreateRecordResponseModel>(createResponse.Content).Metadata.CreatedRecordIds.First();
 
-            var deleteByLabel = DeleteRecordFactory.DeleteByCondition(TasksTable.Id, TasksFields, f => f.Label == field.Label, value);
+            var deleteRequest = DeleteRecordFactory.DeleteRecord(TasksTable.Id, fieldId: field.Id, QueryOperator.EX, value);
+            var deleteRequestSerialized = JsonConvert.SerializeObject(deleteRequest, Formatting.Indented, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
 
-            var deleteResponse = await QuickBaseClient.DeleteRecordAsync(deleteByLabel);
-            var deleteResponseContent = JsonConvert.DeserializeObject<DeleteRecordResponseModel>(deleteResponse.Content);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(deleteResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(deleteResponseContent.NumberDeleted, Is.EqualTo(1));
-            });
-        }
-
-        [Test]
-        public async Task DeleteRecord_LabelNotHighPriority_ShouldSucceed()
-        {
-            var recordToDelete = GenerateRecord(TasksFields);
-            var createRequest = CreateRecordFactory.CreateRecord(TasksTable.Id, recordToDelete);
-            var createResponse = await QuickBaseClient.PostRecordAsync(createRequest);
-            var createContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(createResponse.Content);
-            var recordId = createContent.Metadata.CreatedRecordIds.First();
-
-            var deleteNotHighPriority = DeleteRecordFactory.DeleteByCondition(TasksTable.Id, TasksFields, f => f.Label == "Priority", "High", QueryOperator.NE);
-
-            var deleteResponse = await QuickBaseClient.DeleteRecordAsync(deleteNotHighPriority);
-            var deleteResponseContent = JsonConvert.DeserializeObject<DeleteRecordResponseModel>(deleteResponse.Content);
+            var deleteResponse = await QuickBaseClient.DeleteRecordAsync(deleteRequest);
+            var deleteResult = JsonConvert.DeserializeObject<DeleteRecordResponseModel>(deleteResponse.Content);
 
             Assert.Multiple(() =>
             {
                 Assert.That(deleteResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(deleteResponseContent.NumberDeleted, Is.EqualTo(1));
+                Assert.That(deleteResult.NumberDeleted, Is.EqualTo(1));
             });
         }
     }

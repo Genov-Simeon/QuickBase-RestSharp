@@ -17,7 +17,7 @@ namespace QuickBaseApi.Client
             _restClient.AddDefaultHeader("Authorization", $"QB-USER-TOKEN {config.UserToken}");
         }
 
-        public async Task<List<QuickBaseTable>> GetTablesAsync(string appId)
+        public async Task<List<TableModel>> GetTablesAsync(string appId)
         {
             var request = new RestRequest("/tables", Method.Get)
                 .AddQueryParameter("appId", appId);
@@ -29,12 +29,12 @@ namespace QuickBaseApi.Client
                 throw new Exception($"Failed to get tables: {response.ErrorMessage}");
             }
 
-            var tables = JsonConvert.DeserializeObject<List<QuickBaseTable>>(response.Content);
+            var tables = JsonConvert.DeserializeObject<List<TableModel>>(response.Content);
 
-            return tables ?? new List<QuickBaseTable>();
+            return tables ?? new List<TableModel>();
         }
 
-        public async Task<List<QuickBaseFieldModel>> GetFieldsByTableName(string tableId)
+        public async Task<List<FieldModel>> GetFieldsByTableName(string tableId)
         {
             var request = new RestRequest("/fields", Method.Get)
                 .AddQueryParameter("tableId", tableId);
@@ -46,9 +46,9 @@ namespace QuickBaseApi.Client
                 throw new Exception($"Failed to fetch fields for table {tableId}: {response.ErrorMessage}");
             }
 
-            var fields = JsonConvert.DeserializeObject<List<QuickBaseFieldModel>>(response.Content);
+            var fields = JsonConvert.DeserializeObject<List<FieldModel>>(response.Content);
 
-            return fields ?? new List<QuickBaseFieldModel>();
+            return fields ?? new List<FieldModel>();
         }
 
         public async Task<RestResponse> PostRecordAsync(object requestBody, string? userToken = null)

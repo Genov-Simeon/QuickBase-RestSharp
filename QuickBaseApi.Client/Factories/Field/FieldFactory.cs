@@ -7,7 +7,7 @@ namespace QuickBaseApi.Client.Factories
 {
     public static class FieldFactory
     {
-        public static Dictionary<string, FieldValueModel> GenerateRandomFieldValue(List<QuickBaseFieldModel> fields)
+        public static Dictionary<string, FieldValueModel> GenerateRandomFieldValue(List<FieldModel> fields)
         {
             var optionalField = FieldHelper.GetRandomField(fields);
             var value = GenerateRandomValueForField(optionalField);
@@ -18,7 +18,7 @@ namespace QuickBaseApi.Client.Factories
             };
         }
 
-        public static object GenerateRandomValueForField(QuickBaseFieldModel field)
+        public static object GenerateRandomValueForField(FieldModel field)
         {
             var random = new Random();
 
@@ -66,7 +66,7 @@ namespace QuickBaseApi.Client.Factories
             };
         }
 
-        private static List<string> GetChoices(QuickBaseFieldModel field)
+        private static List<string> GetChoices(FieldModel field)
         {
             if (field.QuickBaseFieldProperties != null &&
                 field.QuickBaseFieldProperties.TryGetValue("choices", out var choices))
@@ -80,7 +80,7 @@ namespace QuickBaseApi.Client.Factories
             return null;
         }
 
-        public static bool IsWritableField(QuickBaseFieldModel field)
+        public static bool IsWritableField(FieldModel field)
         {
             var fieldType = field.FieldType?.ToLowerInvariant();
             var label = field.Label?.ToLowerInvariant();

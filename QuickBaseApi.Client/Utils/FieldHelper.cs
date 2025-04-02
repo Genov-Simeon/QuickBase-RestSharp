@@ -5,25 +5,12 @@ namespace QuickBaseApi.Client.Utils
 {
     public static class FieldHelper
     {
-        public static List<QuickBaseFieldModel> GetWritableFields(List<QuickBaseFieldModel> fields)
+        public static List<FieldModel> GetWritableFields(List<FieldModel> fields)
         {
-            return fields
-                .Where(FieldFactory.IsWritableField)
-                .ToList();
+            return fields.Where(FieldFactory.IsWritableField).ToList();
         }
 
-        public static string GetFieldIdByCondition(List<QuickBaseFieldModel> fields, Func<QuickBaseFieldModel, bool> predicate)
-        {
-            return fields.FirstOrDefault(predicate)?.Id.ToString();
-        }
-
-
-        public static QuickBaseFieldModel GetFieldByLabel(List<QuickBaseFieldModel> fields, string label)
-        { 
-            return fields.FirstOrDefault(f => f.Label == label);
-        }
-
-        public static QuickBaseFieldModel GetRandomField(List<QuickBaseFieldModel> fields, Func<QuickBaseFieldModel, bool> predicate = null)
+        public static FieldModel GetRandomField(List<FieldModel> fields, Func<FieldModel, bool> predicate = null)
         {
             var effectivePredicate = predicate ?? (_ => true);
             var filteredFields = fields.Where(effectivePredicate).ToList();
@@ -35,12 +22,24 @@ namespace QuickBaseApi.Client.Utils
             return filteredFields[random.Next(filteredFields.Count)];
         }
 
-        public static List<string> GetAllFieldLabels(List<QuickBaseFieldModel> fields)
+        public static List<string> GetAllFieldLabels(List<FieldModel> fields)
         {
             return fields
                 .Where(f => !string.IsNullOrWhiteSpace(f.Label))
                 .Select(f => f.Label!)
                 .ToList();
+        }
+
+        public static List<long> GetAllFieldIds(Dictionary<string, FieldValueModel> randomRecord)
+        {
+            var fieldsToReturn = new List<long>();
+
+            foreach (var id in randomRecord.Keys)
+            {
+                fieldsToReturn.Add(long.Parse(id));
+            }
+
+            return fieldsToReturn;
         }
     }
 }
