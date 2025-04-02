@@ -13,8 +13,8 @@ namespace QuickBaseApi.Client
             var options = new RestClientOptions(config.BaseUrl);
             _restClient = new RestClient(options);
 
-            _restClient.AddDefaultHeader("QB-Realm-Hostname", config.Realm);
-            _restClient.AddDefaultHeader("Authorization", $"QB-USER-TOKEN {config.UserToken}");
+            _restClient.AddDefaultHeader(QuickBaseConstants.Headers.RealmHostname, config.Realm);
+            _restClient.AddDefaultHeader(QuickBaseConstants.Headers.Authorization, $"{QuickBaseConstants.Headers.UserToken} {config.UserToken}");
         }
 
         public async Task<List<TableModel>> GetTablesAsync(string appId)
@@ -30,7 +30,6 @@ namespace QuickBaseApi.Client
             }
 
             var tables = JsonConvert.DeserializeObject<List<TableModel>>(response.Content);
-
             return tables ?? new List<TableModel>();
         }
 
@@ -47,38 +46,35 @@ namespace QuickBaseApi.Client
             }
 
             var fields = JsonConvert.DeserializeObject<List<FieldModel>>(response.Content);
-
             return fields ?? new List<FieldModel>();
         }
 
         public async Task<RestResponse> PostRecordAsync(object requestBody, string? userToken = null)
         {
-            var request = new RestRequest("/records", Method.Post);
-            request.AddJsonBody(requestBody);
+            var request = new RestRequest("/records", Method.Post)
+                .AddJsonBody(requestBody);
 
             if (!string.IsNullOrWhiteSpace(userToken))
             {
-                request.AddOrUpdateHeader("Authorization", $"QB-USER-TOKEN {userToken}");
+                request.AddOrUpdateHeader(QuickBaseConstants.Headers.Authorization, $"{QuickBaseConstants.Headers.UserToken} {userToken}");
             }
 
-            var response = await _restClient.ExecuteAsync(request);
-
-            return response;
+            return await _restClient.ExecuteAsync(request);
         }
 
         public async Task<RestResponse> DeleteRecordAsync(object requestBody)
         {
-            var request = new RestRequest("/records", Method.Delete);
-            request.AddJsonBody(requestBody);
+            var request = new RestRequest("/records", Method.Delete)
+                .AddJsonBody(requestBody);
 
             var response = await _restClient.ExecuteAsync(request);
-            
+
             if (!response.IsSuccessful)
             {
-                throw new Exception($"Failed to edit record: {response.Content}");
+                throw new Exception($"Failed to delete record: {response.Content}");
             }
 
             return response;
         }
     }
-} 
+}
