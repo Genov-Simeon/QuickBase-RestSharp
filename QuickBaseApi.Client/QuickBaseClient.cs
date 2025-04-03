@@ -53,13 +53,15 @@ namespace QuickBaseApi.Client
         {
             var request = new RestRequest("/records", Method.Post)
                 .AddJsonBody(requestBody);
+            
+            var response = await _restClient.ExecuteAsync(request);
 
             if (!string.IsNullOrWhiteSpace(userToken))
             {
                 request.AddOrUpdateHeader(QuickBaseConstants.Headers.Authorization, $"{QuickBaseConstants.Headers.UserToken} {userToken}");
             }
 
-            return await _restClient.ExecuteAsync(request);
+            return response;
         }
 
         public async Task<RestResponse> DeleteRecordAsync(object requestBody)

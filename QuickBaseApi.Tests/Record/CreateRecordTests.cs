@@ -29,7 +29,6 @@ namespace QuickBaseApi.Tests
                 Assert.That(responseContent.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(records.Count()));
                 Assertions.AssertFieldValues(responseContent.Data, records, fieldsToReturn);
             });
-
         }
 
         [Test]
@@ -49,7 +48,6 @@ namespace QuickBaseApi.Tests
                 Assert.That(responseContent.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(records.Count()));
                 Assertions.AssertFieldValues(responseContent.Data, records, fieldsToReturn);
             });
-
         }
 
         [Test]
@@ -69,7 +67,6 @@ namespace QuickBaseApi.Tests
                 Assert.That(responseContent.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(1));
                 Assertions.AssertFieldValues(responseContent.Data, new List<Dictionary<string, FieldValueModel>> { record }, fieldsToReturn);
             });
-
         }
 
         [Test]
@@ -89,7 +86,6 @@ namespace QuickBaseApi.Tests
                 Assert.That(responseContent.Metadata.TotalNumberOfRecordsProcessed, Is.EqualTo(1));
                 Assertions.AssertFieldValues(responseContent.Data, new List<Dictionary<string, FieldValueModel>> { record }, fieldsToReturn);
             });
-
         }
 
         [Test]
