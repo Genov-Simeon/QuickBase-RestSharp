@@ -22,14 +22,6 @@ namespace QuickBaseApi.Client.Utils
             return filteredFields[random.Next(filteredFields.Count)];
         }
 
-        public static List<string> GetAllFieldLabels(List<FieldModel> fields)
-        {
-            return fields
-                .Where(f => !string.IsNullOrWhiteSpace(f.Label))
-                .Select(f => f.Label!)
-                .ToList();
-        }
-
         public static List<long> GetAllFieldIds(Dictionary<string, FieldValueModel> randomRecord)
         {
             var fieldsToReturn = new List<long>();

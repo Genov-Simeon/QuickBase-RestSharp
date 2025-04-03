@@ -38,7 +38,7 @@ namespace QuickBaseApi.Client.Models
         public bool? NoWrap { get; set; }
 
         [JsonProperty("properties", NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, object>? QuickBaseFieldProperties { get; set; }
+        public Dictionary<string, object>? Properties { get; set; }
 
         [JsonProperty("required", NullValueHandling = NullValueHandling.Ignore)]
         public bool? Required { get; set; }

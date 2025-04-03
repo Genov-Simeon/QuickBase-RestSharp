@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using NUnit.Framework;
-using QuickBaseApi.Client.Models;
 using System.Text.RegularExpressions;
+using QuickBaseApi.Client.Models;
 
 namespace QuickBaseApi.Client
 {

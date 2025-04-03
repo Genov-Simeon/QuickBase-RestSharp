@@ -93,25 +93,6 @@ namespace QuickBaseApi.Tests
         }
 
         [Test]
-        public async Task AddRecord_OptionalFieldsOnly_ShoudReturnMultiStatus()
-        {
-            var record = GenerateRecord(TasksFields, f => f.Required == false);
-            var fieldsToReturn = FieldHelper.GetAllFieldIds(record);
-            var requestBody = CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
-
-            var response = await QuickBaseClient.PostRecordAsync(requestBody);
-            var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.MultiStatus));
-                Assert.That(responseContent.Metadata.LineErrors.Count(), Is.EqualTo(1));
-                Assert.That(responseContent.Metadata.CreatedRecordIds.Count(), Is.EqualTo(0));
-                Assertions.AssertRequiredFieldsMissingErrorMessage(responseContent, TasksFields);
-            });
-        }
-
-        [Test]
         public async Task AddRecord_SomeOptionalFields_ShouldSucceed()
         {
             var record = GenerateRecord(TasksFields,
@@ -134,9 +115,69 @@ namespace QuickBaseApi.Tests
                 Assertions.AssertFieldValues(responseContent.Data, new List<Dictionary<string, FieldValueModel>> { record }, fieldsToReturn);
             });
         }
+        
+        [Test]
+        public async Task AddRecord_OptionalFieldsOnly_ShoudReturnMultiStatus()
+        {
+            var record = GenerateRecord(TasksFields, f => f.Required == false);
+            var fieldsToReturn = FieldHelper.GetAllFieldIds(record);
+            var requestBody = CreateRecord(TasksTable.Id, record, fieldsToReturn.ToArray());
+
+            var response = await QuickBaseClient.PostRecordAsync(requestBody);
+            var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.MultiStatus));
+                Assert.That(responseContent.Metadata.LineErrors.Count(), Is.EqualTo(1));
+                Assert.That(responseContent.Metadata.CreatedRecordIds.Count(), Is.EqualTo(0));
+                Assertions.AssertRequiredFieldsMissingErrorMessage(responseContent, TasksFields);
+            });
+        }
 
         [Test]
-        public async Task AddRecord_WithInvalidUserToken_ShouldReturnUnauthorized()
+        public async Task AddRecord_InvalidFieldType_ShouldReturnMultiStatus()
+        {
+            var record = GenerateRecord(TasksFields, f => f.Required == true);
+            var numberField = TasksFields.First(f => f.FieldType == "numeric");
+            record[numberField.Id.ToString()] = new FieldValueModel { Value = "not-a-number" };
+
+            var requestBody = CreateRecord(TasksTable.Id, record);
+
+            var response = await QuickBaseClient.PostRecordAsync(requestBody);
+            var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.MultiStatus));
+                Assert.That(responseContent.Metadata.LineErrors.Any(), Is.True);
+                Assert.That(responseContent.Metadata.LineErrors.First().Value.First(), Does.Contain($"Incompatible value for field with ID \"{numberField.Id.ToString()}\""));
+            });
+        }
+
+        [Test]
+        public async Task AddRecord_InvalidFieldId_ShouldReturnBadRequest()
+        {
+            var invalidId = "9999";
+            var record = GenerateRecord(TasksFields, f => f.Required == true);
+            record[invalidId] = new FieldValueModel { Value = "Invalid field" };
+
+            var requestBody = CreateRecord(TasksTable.Id, record);
+
+            var response = await QuickBaseClient.PostRecordAsync(requestBody);
+            var responseContent = JsonConvert.DeserializeObject<CreateRecordResponseModel>(response.Content);
+            var responseContentSER = JsonConvert.SerializeObject(responseContent, Formatting.Indented, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.MultiStatus));
+                Assert.That(responseContent.Metadata.LineErrors.Any(), Is.True);
+                Assert.That(responseContent.Metadata.LineErrors.First().Value.First(), Does.Contain($"Unknown field with Id \"{invalidId}\""));
+            });
+        }
+
+        [Test]
+        public async Task AddRecord_InvalidUserToken_ShouldReturnUnauthorized()
         {
             var token = "Wrong User Token";
             var record = GenerateRecord(TasksFields);
@@ -154,7 +195,7 @@ namespace QuickBaseApi.Tests
         }
 
         [Test]
-        public async Task AddRecord_WithInvalidTableId_ShouldReturnErrorMessage()
+        public async Task AddRecord_InvalidTableId_ShouldReturnErrorMessage()
         {
             var record = GenerateRecord(TasksFields, f => f.Required == true);
             var requestBody = CreateRecord(null, record);
@@ -171,7 +212,7 @@ namespace QuickBaseApi.Tests
         }
 
         [Test]
-        public async Task AddRecord_WithEmptyDataProperty_ShouldReturnErrorMessage()
+        public async Task AddRecord_EmptyDataProperty_ShouldReturnErrorMessage()
         {
             var requestBody = new CreateRecordModel { To = TasksTable.Id, Data = new List<Dictionary<string, FieldValueModel>>(), FieldsToReturn = new List<long>().ToArray() };
 
@@ -187,7 +228,7 @@ namespace QuickBaseApi.Tests
         }
 
         [Test]
-        public async Task AddRecord_WithInvalidDataProperty_ShouldReturnErrorMessage()
+        public async Task AddRecord_InvalidDataProperty_ShouldReturnErrorMessage()
         {
             var requestBody = new CreateRecordModel { To = TasksTable.Id, Data = null, FieldsToReturn = Array.Empty<long>() };
 

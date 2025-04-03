@@ -1,6 +1,5 @@
 ﻿using QuickBaseApi.Client.Enums;
 using QuickBaseApi.Client.Models;
-using QuickBaseApi.Client.Utils;
 
 namespace QuickBaseApi.Client.Factories
 {

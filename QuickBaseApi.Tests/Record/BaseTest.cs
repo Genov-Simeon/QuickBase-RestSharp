@@ -12,14 +12,14 @@ namespace QuickBaseApi.Tests
         const string Projects = "Projects";
         const string Tasks = "Tasks";
 
-        protected QuickBaseClient? QuickBaseClient { get; set; }
         protected RestClient? RestClient { get; set; }
         protected QuickBaseConfig? Config { get; set; }
+        protected QuickBaseClient? QuickBaseClient { get; set; }
 
         protected List<TableModel>? Tables { get; set; }
         protected TableModel? ProjectsTable { get; set; }
-        protected List<FieldModel>? ProjectsFields { get; set; }
         protected TableModel? TasksTable { get; set; }
+        protected List<FieldModel>? ProjectsFields { get; set; }
         protected List<FieldModel>? TasksFields { get; set; }
 
         [OneTimeSetUp]
@@ -29,6 +29,7 @@ namespace QuickBaseApi.Tests
             QuickBaseClient = new QuickBaseClient(Config);
 
             Tables = await QuickBaseClient.GetTablesAsync(Config.AppId);
+
             ProjectsTable = Tables.FirstOrDefault(t => t.Name.Equals(Projects, StringComparison.OrdinalIgnoreCase));
             TasksTable = Tables.FirstOrDefault(t => t.Name.Equals(Tasks, StringComparison.OrdinalIgnoreCase));
 

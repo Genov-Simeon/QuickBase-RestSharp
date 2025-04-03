@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using QuickBaseApi.Client.Models;
 using QuickBaseApi.Client.Utils;
+using NUnit.Framework.Internal;
 
 namespace QuickBaseApi.Client.Factories
 {
@@ -68,8 +69,8 @@ namespace QuickBaseApi.Client.Factories
 
         private static List<string> GetChoices(FieldModel field)
         {
-            if (field.QuickBaseFieldProperties != null &&
-                field.QuickBaseFieldProperties.TryGetValue("choices", out var choices))
+            if (field.Properties != null &&
+                field.Properties.TryGetValue("choices", out var choices))
             {
                 if (choices is JArray jArray)
                     return jArray.Select(c => c.ToString()).ToList();
@@ -85,31 +86,32 @@ namespace QuickBaseApi.Client.Factories
             var fieldType = field.FieldType?.ToLowerInvariant();
             var label = field.Label?.ToLowerInvariant();
 
-            // Exclude known system field types
+            // These are system-managed fields that QuickBase automatically populates and maintains
             if (fieldType is "recordid" or "timestamp")
                 return false;
 
-            // Exclude user fields unless you explicitly handle real user mapping
+            // Require special handling as they need valid QuickBase user IDs. Can be included if user ID mapping is implemented.
             if (fieldType is "user" || fieldType is "multiuser")
                 return false;
 
-            // Exclude read-only fields
+            // Read-only interface element that can't be modified through the API
             if (fieldType is "ICalendarButton")
                 return false;
 
-            // Exclude known system labels; "Order" type field - Quickbase automatically reassigns new value to maintain internal sort order
+            // System-maintained fields that are automatically managed by QuickBase.
+            // "order" - Special field for maintaining record order (auto-reassigned by QuickBase)
             if (label is "date created" or "date modified" or "record id#" or "record owner" or "last modified by" or "assigned to" or "order")
                 return false;
 
-            // Exclude primary key fields
-            if (field.QuickBaseFieldProperties.TryGetValue("PrimaryKey", out var value) && value is bool isPrimaryKey && isPrimaryKey)
+            // Primary keys are typically system-managed and need to maintain uniqueness. Attempting to modify could cause data integrity issues.
+            if (field.Properties.TryGetValue("PrimaryKey", out var value) && value is bool isPrimaryKey && isPrimaryKey)
                 return false;
 
             // Exclude append-only fields (cannot be edited)
-            if (field.QuickBaseFieldProperties.TryGetValue("appendOnly", out var appendOnlyObj) && appendOnlyObj is bool appendOnly && appendOnly)
+            if (field.Properties.TryGetValue("appendOnly", out var appendOnlyObj) && appendOnlyObj is bool appendOnly && appendOnly)
                 return false;
 
-            // Exclude fields based on read-only mode
+            // Computed automatically based on other fields or relationships.
             if (!string.IsNullOrEmpty(field.Mode) && (field.Mode is "lookup" || field.Mode is "formula" || field.Mode is "summary"))
                 return false;
 
