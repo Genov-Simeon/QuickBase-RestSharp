@@ -95,7 +95,7 @@ namespace QuickBaseApi.Client.Factories
                 return false;
 
             // Read-only interface element that can't be modified through the API
-            if (fieldType is "ICalendarButton")
+            if (fieldType is "icalendarbutton")
                 return false;
 
             // System-maintained fields that are automatically managed by QuickBase.
