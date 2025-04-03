@@ -53,13 +53,13 @@ namespace QuickBaseApi.Client
         {
             var request = new RestRequest("/records", Method.Post)
                 .AddJsonBody(requestBody);
-            
-            var response = await _restClient.ExecuteAsync(request);
 
             if (!string.IsNullOrWhiteSpace(userToken))
             {
                 request.AddOrUpdateHeader(QuickBaseConstants.Headers.Authorization, $"{QuickBaseConstants.Headers.UserToken} {userToken}");
             }
+
+            var response = await _restClient.ExecuteAsync(request);
 
             return response;
         }
