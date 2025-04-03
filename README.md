@@ -34,7 +34,8 @@ This project demonstrates API test automation capabilities using C# and NUnit fo
      4. Copy the Application Token
    - **Table ID**: The ID of the table you want to test (found in the table properties)
 
-3. Update the configuration in `QuickBaseApi.Tests/QuickBaseApiTests.cs` with your credentials
+3. The project has two configurations called QA and DEV for easy switching of different environments. Choose the correct one and update the appsettings.*.json configuration in `QuickBaseApi.Tests` with your credentials before building the project.
+
 
 ## Running Tests
 
