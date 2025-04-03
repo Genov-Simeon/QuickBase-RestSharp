@@ -2,23 +2,11 @@
 using Newtonsoft.Json;
 using QuickBaseApi.Client.Models;
 using QuickBaseApi.Client.Utils;
-using NUnit.Framework.Internal;
 
 namespace QuickBaseApi.Client.Factories
 {
     public static class FieldFactory
     {
-        public static Dictionary<string, FieldValueModel> GenerateRandomFieldValue(List<FieldModel> fields)
-        {
-            var optionalField = FieldHelper.GetRandomField(fields);
-            var value = GenerateRandomValueForField(optionalField);
-
-            return new Dictionary<string, FieldValueModel>
-            {
-                [optionalField.Id.ToString()] = new FieldValueModel { Value = value }
-            };
-        }
-
         public static object GenerateRandomValueForField(FieldModel field)
         {
             var random = new Random();
@@ -83,7 +71,10 @@ namespace QuickBaseApi.Client.Factories
 
         public static bool IsWritableField(FieldModel field)
         {
-            var fieldType = field.FieldType?.ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(field.FieldType))
+                return false;
+
+            var fieldType = field.FieldType.ToLowerInvariant();
             var label = field.Label?.ToLowerInvariant();
 
             // These are system-managed fields that QuickBase automatically populates and maintains
